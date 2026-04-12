@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcp-watchdog"
+version = "0.1.0"
+description = "Runtime security proxy for MCP tool calls — intercept, audit, and block suspicious agent behaviour"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "mcp-watchdog contributors" }]
+keywords = ["mcp", "security", "llm", "ai-agents", "prompt-injection", "audit"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Security",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+requires-python = ">=3.11"
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.4",
+    "mypy>=1.10",
+]
+
+[project.scripts]
+mcp-watchdog = "mcp_watchdog.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/divyatej/mcp-watchdog"
+Repository = "https://github.com/divyatej/mcp-watchdog"
+Issues = "https://github.com/divyatej/mcp-watchdog/issues"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"mcp_watchdog/rules.py" = ["E501"]  # long regex patterns inside YAML string literals
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

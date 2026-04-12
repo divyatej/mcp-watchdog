@@ -1,0 +1,85 @@
+# mcp-watchdog default rules
+# Seeded from OWASP Agentic AI Top 10 (2026) and common MCP attack patterns.
+# Community contributions welcome — see CONTRIBUTING.md
+
+rules:
+
+  # ── Sensitive file access ────────────────────────────────────────────────
+  - name: block-sensitive-files
+    match:
+      tool: "read_file"
+      args:
+        path: ".*(\\.env|\\.env\\..*|/etc/passwd|/etc/shadow|id_rsa|id_ed25519|\\.aws/credentials|\\.ssh/).*"
+    action: block
+    reason: "Attempt to read a sensitive credential or system file"
+
+  - name: block-aws-credentials
+    match:
+      tool: "*"
+      args:
+        path: ".*\\.aws.*"
+    action: block
+    reason: "Attempt to access AWS credentials directory"
+
+  # ── Shell / command injection ────────────────────────────────────────────
+  - name: block-shell-injection
+    match:
+      tool: "*"
+      args_any_value: ".*(;|&&|\\|\\||`|\\$\\(|\\beval\\b|\\bexec\\b|\\bos\\.system\\b).*"
+    action: block
+    reason: "Possible shell injection in tool argument"
+
+  - name: block-sudo
+    match:
+      tool: "*"
+      args_any_value: ".*\\bsudo\\b.*"
+    action: block
+    reason: "sudo detected in tool argument"
+
+  # ── Prompt injection via file write ─────────────────────────────────────
+  - name: block-prompt-injection-phrases
+    match:
+      tool: "write_file"
+      args_any_value: ".*(ignore previous instructions|disregard your|you are now|forget your system prompt|new persona|act as|do not follow).*"
+    action: block
+    reason: "Classic prompt injection phrase detected in file write"
+
+  # ── Exfiltration heuristics ──────────────────────────────────────────────
+  - name: alert-long-base64
+    match:
+      tool: "*"
+      args_any_value: "[A-Za-z0-9+/]{200,}={0,2}"
+    action: alert
+    reason: "Unusually long base64 blob — possible data exfiltration"
+
+  - name: alert-env-var-secrets
+    match:
+      tool: "*"
+      args_any_value: ".*\\$(?:AWS_|OPENAI_|ANTHROPIC_|SECRET_|TOKEN_|API_KEY|PRIVATE_KEY)[A-Z_]*.*"
+    action: alert
+    reason: "Environment variable reference matching known secret patterns"
+
+  - name: alert-url-in-write
+    match:
+      tool: "write_file"
+      args_any_value: "https?://"
+    action: alert
+    reason: "URL found in write_file arguments — possible cross-server data relay"
+
+  # ── Cost / loop abuse ────────────────────────────────────────────────────
+  - name: alert-high-frequency
+    match:
+      tool: "*"
+    rate_limit:
+      window_secs: 60
+      max_calls: 50
+    action: alert
+    reason: "More than 50 tool calls in 60 seconds — possible runaway agent loop"
+
+  # ── Privilege escalation ─────────────────────────────────────────────────
+  - name: block-path-traversal
+    match:
+      tool: "*"
+      args_any_value: ".*\\.\\./\\.\\./.*"
+    action: block
+    reason: "Path traversal sequence detected"
