@@ -26,6 +26,9 @@ pip install mcp-watchdog
 ## Quickstart
 
 ```bash
+# Verify install and see loaded rules
+mcp-watchdog rules
+
 # Wrap any stdio MCP server
 mcp-watchdog -- npx @modelcontextprotocol/server-filesystem /data
 
