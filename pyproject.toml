@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "mcp-watchdog"
+name = "mcp-trident"
 version = "0.1.0"
 description = "Runtime security proxy for MCP tool calls — intercept, audit, and block suspicious agent behaviour"
 readme = "README.md"
@@ -33,12 +33,12 @@ dev = [
 ]
 
 [project.scripts]
-mcp-watchdog = "mcp_watchdog.cli:main"
+mcp-trident = "mcp_trident.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/divyatej/mcp-watchdog"
-Repository = "https://github.com/divyatej/mcp-watchdog"
-Issues = "https://github.com/divyatej/mcp-watchdog/issues"
+Homepage = "https://github.com/divyatej/mcp-trident"
+Repository = "https://github.com/divyatej/mcp-trident"
+Issues = "https://github.com/divyatej/mcp-trident/issues"
 
 [tool.ruff]
 line-length = 100
@@ -48,7 +48,7 @@ target-version = "py311"
 select = ["E", "F", "I", "UP"]
 
 [tool.ruff.lint.per-file-ignores]
-"mcp_watchdog/rules.py" = ["E501"]  # long regex patterns inside YAML string literals
+"mcp_trident/rules.py" = ["E501"]  # long regex patterns inside YAML string literals
 
 [tool.mypy]
 python_version = "3.11"

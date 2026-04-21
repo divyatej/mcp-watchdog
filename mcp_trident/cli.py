@@ -1,5 +1,5 @@
 """
-mcp-watchdog CLI entry point.
+mcp-trident CLI entry point.
 
 Subcommands:
   run      (default) — start the proxy
@@ -14,40 +14,40 @@ import sys
 
 def main():
     parser = argparse.ArgumentParser(
-        prog="mcp-watchdog",
+        prog="mcp-trident",
         description="Runtime security proxy for MCP tool calls",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
   # Wrap a stdio MCP server
-  mcp-watchdog -- npx @modelcontextprotocol/server-filesystem /data
+  mcp-trident -- npx @modelcontextprotocol/server-filesystem /data
 
   # Use a custom rules file
-  mcp-watchdog --rules my_rules.yaml -- python my_server.py
+  mcp-trident --rules my_rules.yaml -- python my_server.py
 
   # Generate an HTML report from a previous session log
-  mcp-watchdog report --log mcp_watchdog.jsonl --out report.html
+  mcp-trident report --log mcp_trident.jsonl --out report.html
 
   # Check which rules are loaded
-  mcp-watchdog rules --rules my_rules.yaml
+  mcp-trident rules --rules my_rules.yaml
 """,
     )
 
     parser.add_argument("--rules", metavar="FILE", help="Path to rules YAML (default: built-in)")
     parser.add_argument(
-        "--log", metavar="FILE", default="mcp_watchdog.jsonl", help="Audit log path"
+        "--log", metavar="FILE", default="mcp_trident.jsonl", help="Audit log path"
     )
     parser.add_argument(
         "--verbose", "-v", action="store_true", help="Print every intercepted call to stderr"
     )
-    parser.add_argument("--version", action="version", version="mcp-watchdog 0.1.0")
+    parser.add_argument("--version", action="version", version="mcp-trident 0.1.0")
 
     subparsers = parser.add_subparsers(dest="subcommand")
 
     # report subcommand
     rep = subparsers.add_parser("report", help="Generate HTML report from audit log")
-    rep.add_argument("--log", metavar="FILE", default="mcp_watchdog.jsonl")
-    rep.add_argument("--out", metavar="FILE", default="mcp_watchdog_report.html")
+    rep.add_argument("--log", metavar="FILE", default="mcp_trident.jsonl")
+    rep.add_argument("--out", metavar="FILE", default="mcp_trident_report.html")
 
     # rules subcommand
     rul = subparsers.add_parser("rules", help="Print loaded rules and exit")

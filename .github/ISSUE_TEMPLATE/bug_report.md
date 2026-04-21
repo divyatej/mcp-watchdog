@@ -9,7 +9,7 @@ A clear description of what happened.
 
 **MCP server command**
 ```
-mcp-watchdog -- <your server command here>
+mcp-trident -- <your server command here>
 ```
 
 **Expected behaviour**
@@ -20,11 +20,11 @@ What actually happened.
 
 **Relevant log lines**
 ```
-paste from mcp_watchdog.jsonl
+paste from mcp_trident.jsonl
 ```
 
 **Environment**
 - OS:
 - Python version:
-- mcp-watchdog version:
+- mcp-trident version:
 - MCP client (Claude Desktop / Cursor / other):

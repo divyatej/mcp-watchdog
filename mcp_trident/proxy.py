@@ -1,9 +1,9 @@
 """
-mcp-watchdog: stdio proxy that intercepts, audits, and optionally blocks MCP tool calls.
+mcp-trident: stdio proxy that intercepts, audits, and optionally blocks MCP tool calls.
 
 Usage:
-    mcp-watchdog -- npx @modelcontextprotocol/server-filesystem /path
-    mcp-watchdog --rules rules.yaml -- python my_server.py
+    mcp-trident -- npx @modelcontextprotocol/server-filesystem /path
+    mcp-trident --rules rules.yaml -- python my_server.py
 """
 
 import asyncio
@@ -27,7 +27,7 @@ class MCPProxy:
         self,
         server_cmd: list[str],
         rules_path: str | None = None,
-        log_path: str = "mcp_watchdog.jsonl",
+        log_path: str = "mcp_trident.jsonl",
         verbose: bool = False,
     ):
         self.server_cmd = server_cmd
@@ -130,7 +130,7 @@ class MCPProxy:
 
             if self.verbose:
                 method = msg.get("method", "")
-                print(f"[watchdog] {direction} {method}", file=sys.stderr)
+                print(f"[trident] {direction} {method}", file=sys.stderr)
 
             await write_fn(json.dumps(msg))
 
@@ -156,13 +156,13 @@ class MCPProxy:
                 "error": {
                     "code": -32600,
                     "message": (
-                        f"[mcp-watchdog] Blocked by rule '{verdict.rule_name}': {verdict.reason}"
+                        f"[mcp-trident] Blocked by rule '{verdict.rule_name}': {verdict.reason}"
                     ),
                 },
             }
             await self._write_stdout(json.dumps(err))
             print(
-                f"[watchdog] BLOCKED tool={tool_name} rule={verdict.rule_name}"
+                f"[trident] BLOCKED tool={tool_name} rule={verdict.rule_name}"
                 f" reason={verdict.reason}",
                 file=sys.stderr,
             )
@@ -170,7 +170,7 @@ class MCPProxy:
 
         if verdict.action == "alert":
             print(
-                f"[watchdog] ALERT tool={tool_name} rule={verdict.rule_name}"
+                f"[trident] ALERT tool={tool_name} rule={verdict.rule_name}"
                 f" reason={verdict.reason}",
                 file=sys.stderr,
             )

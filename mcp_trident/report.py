@@ -1,8 +1,8 @@
 """
-Generate a self-contained HTML audit report from a mcp_watchdog.jsonl log.
+Generate a self-contained HTML audit report from a mcp_trident.jsonl log.
 
 Usage:
-    mcp-watchdog report --log mcp_watchdog.jsonl --out report.html
+    mcp-trident report --log mcp_trident.jsonl --out report.html
 """
 
 import html as _html
@@ -17,7 +17,7 @@ def _e(value) -> str:
     return _html.escape(str(value))
 
 
-def generate_report(log_path: str, out_path: str = "mcp_watchdog_report.html"):
+def generate_report(log_path: str, out_path: str = "mcp_trident_report.html"):
     events = load_log(log_path)
     if not events:
         print(f"No events found in {log_path}")
@@ -88,7 +88,7 @@ def _build_html(sessions, tool_calls, blocks, alerts, timeline, log_path):
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>mcp-watchdog audit report</title>
+<title>mcp-trident audit report</title>
 <style>
   * {{ box-sizing: border-box; margin: 0; padding: 0; }}
   body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -113,7 +113,7 @@ def _build_html(sessions, tool_calls, blocks, alerts, timeline, log_path):
 </style>
 </head>
 <body>
-<h1>🐕 mcp-watchdog audit report</h1>
+<h1>🐕 mcp-trident audit report</h1>
 <div class="sub">Log: {log_path} &nbsp;·&nbsp; Sessions: {len(sessions)}</div>
 
 <div class="cards">

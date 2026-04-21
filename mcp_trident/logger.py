@@ -1,5 +1,5 @@
 """
-Structured JSONL audit logger for mcp-watchdog.
+Structured JSONL audit logger for mcp-trident.
 
 Each line is a self-contained JSON event.  This makes the log trivially
 queryable with jq, importable into any SIEM, and parseable by the report
@@ -14,7 +14,7 @@ from .rules import Verdict
 
 
 class AuditLogger:
-    def __init__(self, log_path: str = "mcp_watchdog.jsonl"):
+    def __init__(self, log_path: str = "mcp_trident.jsonl"):
         self._path = Path(log_path)
         self._buffer: list[dict] = []
 

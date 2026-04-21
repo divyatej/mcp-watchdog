@@ -1,4 +1,4 @@
-# Contributing to mcp-watchdog
+# Contributing to mcp-trident
 
 Thanks for helping make AI agents safer.
 
@@ -23,7 +23,7 @@ pytest tests/ -v
 
 ## Adding a new rule + test
 
-1. Add the rule to the `DEFAULT_RULES_YAML` constant in `mcp_watchdog/rules.py` (that is the active default ruleset). The `rules.yaml` in the repo root is a reference copy for users who supply `--rules`.
+1. Add the rule to the `DEFAULT_RULES_YAML` constant in `mcp_trident/rules.py` (that is the active default ruleset). The `rules.yaml` in the repo root is a reference copy for users who supply `--rules`.
 2. Add a test in `tests/test_rules.py` that:
    - verifies the rule fires on a known-bad input
    - verifies it does NOT fire on a known-good input (false-positive check)

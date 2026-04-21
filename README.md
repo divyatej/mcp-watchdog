@@ -1,4 +1,4 @@
-# 🐕 mcp-watchdog
+# 🐕 mcp-trident
 
 **Runtime security proxy for MCP tool calls.**
 
@@ -8,43 +8,43 @@ optionally blocked — with zero changes to your client or server.
 
 ```
 ┌─────────────────┐      ┌──────────────────┐      ┌──────────────────┐
-│   MCP client    │─────▶│  mcp-watchdog    │─────▶│   MCP server     │
+│   MCP client    │─────▶│  mcp-trident    │─────▶│   MCP server     │
 │ (Claude Desktop │      │  (this tool)     │      │ (filesystem, DB, │
 │  Cursor, etc.)  │◀─────│  intercept/log/  │◀─────│  code exec, etc) │
 └─────────────────┘      │  block           │      └──────────────────┘
                          └──────────────────┘
                                   │
-                         mcp_watchdog.jsonl
+                         mcp_trident.jsonl
 ```
 
 ## Install
 
 ```bash
-pip install mcp-watchdog
+pip install mcp-trident
 ```
 
 ## Quickstart
 
 ```bash
 # Verify install and see loaded rules
-mcp-watchdog rules
+mcp-trident rules
 
 # Wrap any stdio MCP server
-mcp-watchdog -- npx @modelcontextprotocol/server-filesystem /data
+mcp-trident -- npx @modelcontextprotocol/server-filesystem /data
 
 # Use a custom rules file
-mcp-watchdog --rules my_rules.yaml -- python my_server.py
+mcp-trident --rules my_rules.yaml -- python my_server.py
 
 # Verbose mode (prints every call to stderr)
-mcp-watchdog --verbose -- npx @modelcontextprotocol/server-filesystem /data
+mcp-trident --verbose -- npx @modelcontextprotocol/server-filesystem /data
 
 # Generate an HTML report after a session
-mcp-watchdog report --log mcp_watchdog.jsonl --out report.html
+mcp-trident report --log mcp_trident.jsonl --out report.html
 open report.html
 
 # Check which rules are loaded
-mcp-watchdog rules
-mcp-watchdog rules --rules my_rules.yaml
+mcp-trident rules
+mcp-trident rules --rules my_rules.yaml
 ```
 
 ## What it detects
@@ -113,16 +113,16 @@ Query it with `jq`:
 
 ```bash
 # All blocked calls
-jq 'select(.action == "block")' mcp_watchdog.jsonl
+jq 'select(.action == "block")' mcp_trident.jsonl
 
 # Call frequency per tool
-jq -r 'select(.tool) | .tool' mcp_watchdog.jsonl | sort | uniq -c | sort -rn
+jq -r 'select(.tool) | .tool' mcp_trident.jsonl | sort | uniq -c | sort -rn
 ```
 
 ## HTML report
 
 ```bash
-mcp-watchdog report --log mcp_watchdog.jsonl --out report.html
+mcp-trident report --log mcp_trident.jsonl --out report.html
 ```
 
 Generates a self-contained dark-mode dashboard with:
@@ -141,7 +141,7 @@ Generates a self-contained dark-mode dashboard with:
 | MintMCP | Paid / SaaS | Enterprise gateway, SOC2, guardrails | Heavyweight, SaaS dependency |
 | Stacklok / ToolHive | Open source | Kubernetes-native gateway, RBAC | Requires Kubernetes |
 | Microsoft AGT | Open source | Full OWASP Agentic AI Top 10 coverage | Large platform, complex setup |
-| **mcp-watchdog** | **Open source** | **Zero-infra runtime proxy, YAML rules** | **stdio only (SSE coming soon)** |
+| **mcp-trident** | **Open source** | **Zero-infra runtime proxy, YAML rules** | **stdio only (SSE coming soon)** |
 
 ## Contributing
 

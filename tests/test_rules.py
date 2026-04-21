@@ -1,10 +1,10 @@
 """
-Tests for the mcp-watchdog rule engine and proxy logic.
+Tests for the mcp-trident rule engine and proxy logic.
 """
 
 import pytest
 
-from mcp_watchdog.rules import RuleEngine
+from mcp_trident.rules import RuleEngine
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -112,7 +112,7 @@ class TestCustomRules:
 
     def test_custom_block_rule(self):
         """Custom YAML rule blocks a specific tool."""
-        from mcp_watchdog.rules import RuleEngine
+        from mcp_trident.rules import RuleEngine
 
         custom_yaml = """
 rules:
@@ -136,7 +136,7 @@ rules:
         assert v2.action == "allow"
 
     def test_wildcard_tool_match(self):
-        from mcp_watchdog.rules import RuleEngine
+        from mcp_trident.rules import RuleEngine
 
         custom_yaml = """
 rules:
@@ -161,7 +161,7 @@ rules:
 # ---------------------------------------------------------------------------
 
 def test_flatten_nested():
-    from mcp_watchdog.rules import _flatten_values
+    from mcp_trident.rules import _flatten_values
     result = _flatten_values({"a": {"b": "deep_value"}, "c": ["list_item"]})
     assert "deep_value" in result
     assert "list_item" in result

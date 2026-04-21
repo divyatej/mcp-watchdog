@@ -1,5 +1,5 @@
 """
-Rule engine for mcp-watchdog.
+Rule engine for mcp-trident.
 
 Rules are loaded from a YAML file.  Each rule specifies:
   - match conditions  (tool name glob, argument patterns)
@@ -164,7 +164,7 @@ class RuleEngine:
             # (full YAML parsing requires PyYAML)
             import sys
             print(  # noqa: T201
-                "[watchdog] PyYAML not found — using built-in default rules only",
+                "[trident] PyYAML not found — using built-in default rules only",
                 file=sys.stderr,
             )
             self._load_defaults_without_yaml()
