@@ -154,7 +154,7 @@ class MCPProxy:
                 "jsonrpc": "2.0",
                 "id": msg.get("id"),
                 "error": {
-                    "code": -32600,
+                    "code": -32000,
                     "message": (
                         f"[mcp-trident] Blocked by rule '{verdict.rule_name}': {verdict.reason}"
                     ),
@@ -182,26 +182,31 @@ class MCPProxy:
     # ------------------------------------------------------------------
 
     async def _read_stdin(self) -> str | None:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         try:
             line = await loop.run_in_executor(None, sys.stdin.readline)
             return line if line else None
-        except Exception:
+        except Exception as e:
+            if self.verbose:
+                print(f"[trident] read-from-stdin error: {e}", file=sys.stderr)
             return None
 
     async def _read_server(self) -> str | None:
         try:
             line = await self._proc.stdout.readline()
             return line.decode() if line else None
-        except Exception:
+        except Exception as e:
+            if self.verbose:
+                print(f"[trident] read-from-server error: {e}", file=sys.stderr)
             return None
 
     async def _write_server(self, data: str):
         try:
             self._proc.stdin.write((data + "\n").encode())
             await self._proc.stdin.drain()
-        except Exception:
-            pass
+        except Exception as e:
+            if self.verbose:
+                print(f"[trident] write-to-server error: {e}", file=sys.stderr)
 
     async def _write_stdout(self, data: str):
         sys.stdout.write(data + "\n")

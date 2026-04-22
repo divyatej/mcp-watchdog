@@ -10,6 +10,7 @@ Subcommands:
 import argparse
 import asyncio
 import sys
+from importlib.metadata import version as _pkg_version
 
 
 def main():
@@ -40,7 +41,9 @@ Examples:
     parser.add_argument(
         "--verbose", "-v", action="store_true", help="Print every intercepted call to stderr"
     )
-    parser.add_argument("--version", action="version", version="mcp-trident 0.1.0")
+    parser.add_argument(
+        "--version", action="version", version=f"mcp-trident {_pkg_version('mcp-trident')}"
+    )
 
     subparsers = parser.add_subparsers(dest="subcommand")
 

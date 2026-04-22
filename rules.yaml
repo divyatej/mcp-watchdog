@@ -72,6 +72,6 @@ rules:
   - name: block-path-traversal
     match:
       tool: "*"
-      args_any_value: ".*\\.\\./\\.\\./.*"
+      args_any_value: ".*\\.\\./.*"
     action: block
     reason: "Path traversal sequence detected"

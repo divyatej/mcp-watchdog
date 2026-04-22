@@ -6,7 +6,7 @@ Usage:
 """
 
 import html as _html
-from collections import Counter, defaultdict
+from collections import Counter, OrderedDict, defaultdict
 from pathlib import Path
 
 from .logger import load_log
@@ -40,7 +40,6 @@ def generate_report(log_path: str, out_path: str = "mcp_trident_report.html"):
     alerts = [v for v in verdicts if v["action"] == "alert"]
 
     # Timeline for sparkline (tool calls per minute bucket)
-    from collections import OrderedDict
     minute_buckets: defaultdict = defaultdict(int)
     for e in events:
         if e["type"] == "message" and e.get("tool"):
@@ -113,7 +112,7 @@ def _build_html(sessions, tool_calls, blocks, alerts, timeline, log_path):
 </style>
 </head>
 <body>
-<h1>🐕 mcp-trident audit report</h1>
+<h1>mcp-trident audit report</h1>
 <div class="sub">Log: {log_path} &nbsp;·&nbsp; Sessions: {len(sessions)}</div>
 
 <div class="cards">

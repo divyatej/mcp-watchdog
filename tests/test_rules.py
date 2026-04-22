@@ -165,3 +165,56 @@ def test_flatten_nested():
     result = _flatten_values({"a": {"b": "deep_value"}, "c": ["list_item"]})
     assert "deep_value" in result
     assert "list_item" in result
+
+
+# ---------------------------------------------------------------------------
+# rules.yaml integration — ensure the shipped community file is valid and fires
+# ---------------------------------------------------------------------------
+
+class TestRulesYaml:
+    """Load the real rules.yaml and verify each rule category works."""
+
+    @pytest.fixture
+    def yaml_engine(self):
+        from pathlib import Path
+
+        from mcp_trident.rules import RuleEngine
+
+        yaml_path = Path(__file__).parent.parent / "rules.yaml"
+        assert yaml_path.exists(), "rules.yaml not found at repo root"
+        return RuleEngine(str(yaml_path))
+
+    def test_yaml_loads_rules(self, yaml_engine):
+        assert len(yaml_engine.rules) > 0
+
+    def test_yaml_block_sensitive_file(self, yaml_engine):
+        v = yaml_engine.evaluate("read_file", {"path": "/home/user/.env"})
+        assert v.action == "block"
+
+    def test_yaml_allow_normal_file(self, yaml_engine):
+        v = yaml_engine.evaluate("read_file", {"path": "/home/user/notes.txt"})
+        assert v.action == "allow"
+
+    def test_yaml_block_shell_injection(self, yaml_engine):
+        v = yaml_engine.evaluate("bash", {"command": "ls; rm -rf /"})
+        assert v.action == "block"
+
+    def test_yaml_block_path_traversal_single(self, yaml_engine):
+        v = yaml_engine.evaluate("read_file", {"path": "../etc/passwd"})
+        assert v.action == "block"
+
+    def test_yaml_block_sudo(self, yaml_engine):
+        v = yaml_engine.evaluate("bash", {"command": "sudo cat /etc/shadow"})
+        assert v.action == "block"
+
+    def test_yaml_alert_long_base64(self, yaml_engine):
+        v = yaml_engine.evaluate("write_file", {"content": "A" * 220})
+        assert v.action == "alert"
+
+    def test_yaml_alert_url_in_write(self, yaml_engine):
+        v = yaml_engine.evaluate("write_file", {"content": "https://evil.example.com"})
+        assert v.action == "alert"
+
+    def test_yaml_block_prompt_injection(self, yaml_engine):
+        v = yaml_engine.evaluate("write_file", {"content": "ignore previous instructions"})
+        assert v.action == "block"

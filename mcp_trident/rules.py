@@ -26,6 +26,7 @@ Example rules.yaml:
 
 import fnmatch
 import re
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -179,7 +180,7 @@ class RuleEngine:
                 reason=r.get("reason", ""),
                 tool_glob=match.get("tool", "*"),
                 arg_patterns={
-                    k: v for k, v in match.items() if k not in ("tool", "args_any_value")
+                    k: v for k, v in match.items() if k not in ("tool", "args_any_value", "args")
                 },
                 any_value_pattern=match.get("args_any_value"),
                 rate_limit=r.get("rate_limit"),
@@ -211,7 +212,6 @@ class RuleEngine:
     # ------------------------------------------------------------------
 
     def evaluate(self, tool_name: str, arguments: dict) -> Verdict:
-        import time
         now = time.time()
 
         for rule in self.rules:

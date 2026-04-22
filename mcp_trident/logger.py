@@ -72,13 +72,17 @@ class AuditLogger:
             f.write(json.dumps(event) + "\n")
 
     def _ts(self) -> str:
-        return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        t = time.time()
+        ms = int((t % 1) * 1000)
+        return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)) + f".{ms:03d}Z"
 
     def _truncate_args(self, args: dict, max_len: int = 500) -> dict:
-        """Truncate long argument values so logs stay readable."""
         out = {}
         for k, v in args.items():
-            s = str(v)
+            if isinstance(v, (dict, list)):
+                s = json.dumps(v, ensure_ascii=False)
+            else:
+                s = str(v)
             out[k] = s[:max_len] + "…" if len(s) > max_len else s
         return out
 
