@@ -168,6 +168,56 @@ def test_flatten_nested():
 
 
 # ---------------------------------------------------------------------------
+# Robustness / bug-fix regression tests
+# ---------------------------------------------------------------------------
+
+def test_evaluate_null_arguments(engine):
+    """arguments=None (from JSON null) must not crash."""
+    v = engine.evaluate("read_file", None)
+    assert v.action == "allow"
+
+
+def test_evaluate_empty_yaml():
+    """Empty rules YAML should load zero rules without crashing."""
+    from mcp_trident.rules import RuleEngine
+    e = RuleEngine.__new__(RuleEngine)
+    e.rules = []
+    e._call_times = []
+    e._load_yaml("")
+    assert e.rules == []
+
+
+def test_evaluate_invalid_yaml(capsys):
+    """Malformed YAML should print an error and load zero rules."""
+    from mcp_trident.rules import RuleEngine
+    e = RuleEngine.__new__(RuleEngine)
+    e.rules = []
+    e._call_times = []
+    e._load_yaml("rules: [{{invalid")
+    assert e.rules == []
+    assert "Failed to parse" in capsys.readouterr().err
+
+
+def test_missing_rules_file_warns(tmp_path, capsys):
+    """Specifying a non-existent rules file should warn and use defaults."""
+    from mcp_trident.rules import RuleEngine
+    engine = RuleEngine(str(tmp_path / "nonexistent.yaml"))
+    assert len(engine.rules) > 0            # defaults loaded
+    assert "not found" in capsys.readouterr().err
+
+
+def test_verdict_is_immutable():
+    """Verdict must be frozen — mutation should raise."""
+    from mcp_trident.rules import Verdict
+    v = Verdict(action="allow", rule_name="default", reason="ok")
+    try:
+        v.action = "block"
+        assert False, "Expected FrozenInstanceError"
+    except Exception:
+        pass
+
+
+# ---------------------------------------------------------------------------
 # rules.yaml integration — ensure the shipped community file is valid and fires
 # ---------------------------------------------------------------------------
 

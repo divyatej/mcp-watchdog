@@ -26,6 +26,7 @@ Example rules.yaml:
 
 import fnmatch
 import re
+import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -53,7 +54,7 @@ class Rule:
     rate_limit: dict | None = None                             # {window_secs, max_calls}
 
 
-@dataclass
+@dataclass(frozen=True)
 class Verdict:
     action: str          # "allow" | "alert" | "block"
     rule_name: str
@@ -154,8 +155,16 @@ class RuleEngine:
         self.rules: list[Rule] = []
         self._call_times: list[float] = []   # for rate-limit tracking
 
-        if rules_path and Path(rules_path).exists():
-            self._load_yaml(Path(rules_path).read_text())
+        if rules_path:
+            path = Path(rules_path)
+            if path.exists():
+                self._load_yaml(path.read_text())
+            else:
+                print(
+                    f"[trident] Rules file not found: {rules_path} — using built-in defaults",
+                    file=sys.stderr,
+                )
+                self._load_yaml(DEFAULT_RULES_YAML)
         else:
             self._load_yaml(DEFAULT_RULES_YAML)
 
@@ -163,7 +172,6 @@ class RuleEngine:
         if not HAS_YAML:
             # Fallback: load only default rules via a tiny hand-rolled parser
             # (full YAML parsing requires PyYAML)
-            import sys
             print(  # noqa: T201
                 "[trident] PyYAML not found — using built-in default rules only",
                 file=sys.stderr,
@@ -171,7 +179,14 @@ class RuleEngine:
             self._load_defaults_without_yaml()
             return
 
-        data = yaml.safe_load(text)
+        try:
+            data = yaml.safe_load(text)
+        except yaml.YAMLError as e:
+            print(f"[trident] Failed to parse rules YAML: {e}", file=sys.stderr)
+            return
+        if not isinstance(data, dict):
+            print("[trident] Rules file is empty — no rules loaded", file=sys.stderr)
+            return
         for r in data.get("rules", []):
             match = r.get("match", {})
             rule = Rule(
@@ -212,6 +227,7 @@ class RuleEngine:
     # ------------------------------------------------------------------
 
     def evaluate(self, tool_name: str, arguments: dict) -> Verdict:
+        arguments = arguments or {}
         now = time.time()
 
         for rule in self.rules:

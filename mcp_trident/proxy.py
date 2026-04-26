@@ -143,7 +143,7 @@ class MCPProxy:
             return msg, False
 
         tool_name = msg.get("params", {}).get("name", "")
-        arguments = msg.get("params", {}).get("arguments", {})
+        arguments = msg.get("params", {}).get("arguments") or {}
 
         verdict = self.rules.evaluate(tool_name, arguments)
         self.logger.log_verdict(self._session_id, tool_name, arguments, verdict)

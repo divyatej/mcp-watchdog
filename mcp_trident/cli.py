@@ -101,6 +101,9 @@ Examples:
         exit_code = asyncio.run(proxy.run())
     except KeyboardInterrupt:
         exit_code = 0
+    except OSError as e:
+        print(f"Error: failed to start '{remainder[0]}': {e.strerror}", file=sys.stderr)
+        sys.exit(1)
 
     sys.exit(exit_code)
 

@@ -30,19 +30,19 @@ def generate_report(log_path: str, out_path: str = "mcp_trident_report.html"):
 
     for e in events:
         sessions.add(e.get("session", ""))
-        if e["type"] == "message":
+        if e.get("type") == "message":
             if e.get("tool"):
                 tool_calls[e["tool"]] += 1
-        elif e["type"] == "verdict":
+        elif e.get("type") == "verdict":
             verdicts.append(e)
 
-    blocks = [v for v in verdicts if v["action"] == "block"]
-    alerts = [v for v in verdicts if v["action"] == "alert"]
+    blocks = [v for v in verdicts if v.get("action") == "block"]
+    alerts = [v for v in verdicts if v.get("action") == "alert"]
 
     # Timeline for sparkline (tool calls per minute bucket)
     minute_buckets: defaultdict = defaultdict(int)
     for e in events:
-        if e["type"] == "message" and e.get("tool"):
+        if e.get("type") == "message" and e.get("tool"):
             minute = e["ts"][:16]  # "YYYY-MM-DDTHH:MM"
             minute_buckets[minute] += 1
     timeline = list(OrderedDict(sorted(minute_buckets.items())).items())
@@ -113,7 +113,7 @@ def _build_html(sessions, tool_calls, blocks, alerts, timeline, log_path):
 </head>
 <body>
 <h1>mcp-trident audit report</h1>
-<div class="sub">Log: {log_path} &nbsp;·&nbsp; Sessions: {len(sessions)}</div>
+<div class="sub">Log: {_e(log_path)} &nbsp;·&nbsp; Sessions: {len(sessions)}</div>
 
 <div class="cards">
   <div class="card">

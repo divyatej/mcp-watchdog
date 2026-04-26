@@ -16,6 +16,7 @@ from .rules import Verdict
 class AuditLogger:
     def __init__(self, log_path: str = "mcp_trident.jsonl"):
         self._path = Path(log_path)
+        self._path.parent.mkdir(parents=True, exist_ok=True)
         self._buffer: list[dict] = []
 
     # ------------------------------------------------------------------
@@ -77,6 +78,8 @@ class AuditLogger:
         return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(t)) + f".{ms:03d}Z"
 
     def _truncate_args(self, args: dict, max_len: int = 500) -> dict:
+        if not isinstance(args, dict):
+            return {}
         out = {}
         for k, v in args.items():
             if isinstance(v, (dict, list)):
