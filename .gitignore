@@ -10,3 +10,6 @@ build/
 fake_server.py
 .vscode/
 posts/
+*.md.local
+.pypirc
+.env.local

@@ -2,6 +2,9 @@
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build]
+exclude = ["*.md.local", ".pypirc", "posts/"]
+
 [project]
 name = "mcp-trident"
 version = "0.1.0"
