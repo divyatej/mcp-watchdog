@@ -5,11 +5,12 @@
 rules:
 
   # ── Sensitive file access ────────────────────────────────────────────────
+  # tool: "*" — catches any tool name so renaming (fetch_context, load_doc,
+  # get_file, etc.) cannot bypass this rule.
   - name: block-sensitive-files
     match:
-      tool: "read_file"
-      args:
-        path: ".*(\\.env|\\.env\\..*|/etc/passwd|/etc/shadow|id_rsa|id_ed25519|\\.aws/credentials|\\.ssh/).*"
+      tool: "*"
+      args_any_value: ".*(\\.env|\\.env\\..*|/etc/passwd|/etc/shadow|id_rsa|id_ed25519|\\.aws/credentials|\\.ssh/).*"
     action: block
     reason: "Attempt to read a sensitive credential or system file"
 
@@ -28,13 +29,15 @@ rules:
     action: block
     reason: "sudo detected in tool argument"
 
-  # ── Prompt injection via file write ─────────────────────────────────────
-  - name: block-prompt-injection-phrases
+  # ── Prompt injection ────────────────────────────────────────────────────
+  # tool: "*" — injection phrases are dangerous in any tool argument;
+  # using save_doc / create_file / write_document cannot bypass this.
+  - name: block-prompt-injection
     match:
-      tool: "write_file"
+      tool: "*"
       args_any_value: ".*(ignore previous instructions|disregard your|you are now|forget your system prompt|new persona|act as|do not follow).*"
     action: block
-    reason: "Classic prompt injection phrase detected in file write"
+    reason: "Classic prompt injection phrase detected in tool argument"
 
   # ── Exfiltration heuristics ──────────────────────────────────────────────
   - name: alert-long-base64

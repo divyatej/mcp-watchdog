@@ -71,11 +71,12 @@ ALLOW_VERDICT = Verdict(action="allow", rule_name="default", reason="No rule mat
 DEFAULT_RULES_YAML = r"""
 rules:
   # ── Sensitive file access ────────────────────────────────────────────
+  # tool: '*' — catches any tool name (fetch_context, load_doc, etc.),
+  # not just 'read_file', so renaming the tool cannot bypass this rule.
   - name: block-sensitive-files
     match:
-      tool: 'read_file'
-      args:
-        path: '.*(\.env|\.env\..*|/etc/passwd|/etc/shadow|id_rsa|id_ed25519|\.aws/credentials|\.ssh/).*'
+      tool: '*'
+      args_any_value: '.*(\.env|\.env\..*|/etc/passwd|/etc/shadow|id_rsa|id_ed25519|\.aws/credentials|\.ssh/).*'
     action: block
     reason: 'Attempt to read a sensitive credential or system file'
 
@@ -110,13 +111,15 @@ rules:
     action: alert
     reason: 'URL found in write_file arguments — possible cross-server data relay'
 
-  # ── Prompt injection via file write ─────────────────────────────────
-  - name: block-prompt-injection-write
+  # ── Prompt injection ─────────────────────────────────────────────────
+  # tool: '*' — injection phrases are dangerous regardless of which tool
+  # carries them; using 'save_doc' or 'create_file' cannot bypass this.
+  - name: block-prompt-injection
     match:
-      tool: 'write_file'
+      tool: '*'
       args_any_value: '.*(ignore previous instructions|disregard your|you are now|forget your system prompt).*'
     action: block
-    reason: 'Classic prompt injection phrase detected in file write'
+    reason: 'Classic prompt injection phrase detected in tool argument'
 
   # ── Privilege escalation ─────────────────────────────────────────────
   - name: block-sudo
@@ -212,8 +215,8 @@ class RuleEngine:
                 name="block-sensitive-files",
                 action="block",
                 reason="Sensitive file access",
-                tool_glob="read_file",
-                arg_patterns={"path": r".*(\\.env|/etc/passwd|id_rsa|\\.aws/credentials).*"},
+                tool_glob="*",  # any tool name — mirrors the YAML rule
+                any_value_pattern=r".*(\.env|/etc/passwd|/etc/shadow|id_rsa|id_ed25519|\.aws/credentials|\.ssh/).*",
             ),
             Rule(
                 name="block-shell-injection",
@@ -221,6 +224,13 @@ class RuleEngine:
                 reason="Shell injection pattern",
                 tool_glob="*",
                 any_value_pattern=r".*(;|&&|\|\||`|\$\(|eval|exec).*",
+            ),
+            Rule(
+                name="block-prompt-injection",
+                action="block",
+                reason="Classic prompt injection phrase",
+                tool_glob="*",
+                any_value_pattern=r".*(ignore previous instructions|disregard your|you are now|forget your system prompt).*",
             ),
         ]
 
@@ -268,20 +278,29 @@ class RuleEngine:
         return ALLOW_VERDICT
 
 
-def _flatten_values(obj: Any, depth: int = 0) -> list[str]:
-    """Recursively extract all string values from a nested dict/list."""
-    if depth > 5:
+def _flatten_values(obj: Any, depth: int = 0, _budget: list[int] | None = None) -> list[str]:
+    """Recursively extract all string values from a nested dict/list.
+
+    Guards:
+      depth  <= 10  — prevents bypass via excessive nesting (was 5, raised to 10)
+      budget <= 500 — prevents O(n) blowup from pathologically wide arrays
+    """
+    if _budget is None:
+        _budget = [500]
+    if depth > 10 or _budget[0] <= 0:
         return []
     if isinstance(obj, str):
+        _budget[0] -= 1
         return [obj]
     if isinstance(obj, dict):
         out = []
         for v in obj.values():
-            out.extend(_flatten_values(v, depth + 1))
+            out.extend(_flatten_values(v, depth + 1, _budget))
         return out
     if isinstance(obj, list):
         out = []
         for v in obj:
-            out.extend(_flatten_values(v, depth + 1))
+            out.extend(_flatten_values(v, depth + 1, _budget))
         return out
+    _budget[0] -= 1
     return [str(obj)]
