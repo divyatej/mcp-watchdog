@@ -154,11 +154,11 @@ Built-in rules cover the [OWASP Agentic AI Top 10](https://owasp.org/www-project
 
 | Rule | Action | What triggers it |
 |---|---|---|
-| `block-sensitive-files` | **block** | Reading `.env`, `/etc/passwd`, SSH keys, AWS credentials |
+| `block-sensitive-files` | **block** | `.env`, `/etc/passwd`, SSH keys, AWS credentials in any argument of any tool |
 | `block-shell-injection` | **block** | `;` `&&` `\|\|` `` ` `` `$()` `eval` `exec` in any argument |
 | `block-sudo` | **block** | `sudo` in any argument |
 | `block-path-traversal` | **block** | `../../` in any argument |
-| `block-prompt-injection-phrases` | **block** | Classic injection phrases in `write_file` arguments |
+| `block-prompt-injection` | **block** | Classic injection phrases in any argument of any tool |
 | `alert-long-base64` | alert | 200+ character base64 blob (exfiltration heuristic) |
 | `alert-env-var-secrets` | alert | `$AWS_` `$OPENAI_` `$SECRET_` etc. in any argument |
 | `alert-url-in-write` | alert | URL inside `write_file` (cross-server relay pattern) |
